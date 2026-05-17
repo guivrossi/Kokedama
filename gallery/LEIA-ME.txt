@@ -1,0 +1,25 @@
+COMO ATUALIZAR A GALERIA DO SITE
+================================
+
+1. Coloque suas fotos nesta pasta (gallery/)
+   - Formatos: JPG, PNG ou WebP
+   - Use nomes simples, sem espaços: ex. kokedama-presente.jpg
+
+2. Abra o arquivo gallery/gallery.json e edite a lista "photos":
+   - "file": nome do arquivo (ex. kokedama-presente.jpg)
+   - "caption": texto que aparece na foto (opcional)
+
+   Exemplo:
+   {
+     "photos": [
+       { "file": "minha-foto-1.jpg", "caption": "Kokedama média" },
+       { "file": "minha-foto-2.jpg", "caption": "Presente dia das mães" }
+     ]
+   }
+
+3. Para remover uma foto: apague a linha no JSON e (opcional) apague o arquivo.
+
+4. Ferramenta visual: abra admin/galeria.html no navegador para montar
+   o JSON e baixar o arquivo pronto — depois substitua gallery/gallery.json.
+
+5. Publique a pasta gallery/ inteira no seu hospedeiro (junto com o site).

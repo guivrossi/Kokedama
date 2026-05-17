@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atualizar galeria — Kokedama Nice &amp; Lua</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --moss: #2c4a2e;
+      --sand: #f5f0e8;
+      --cream: #fafaf5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--cream);
+      color: #1a2e1b;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      color: var(--moss);
+      font-size: 1.75rem;
+    }
+    .steps {
+      background: var(--sand);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    .steps ol { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+    .card {
+      background: #fff;
+      border: 1px solid #e8e0d4;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #e8e0d4;
+      border-radius: 8px;
+      font: inherit;
+      margin-bottom: 0.75rem;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      border: none;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .btn-primary { background: var(--moss); color: #fff; }
+    .btn-secondary { background: #e8e0d4; color: var(--moss); }
+    .btn-danger { background: #f5e8e8; color: #8b3a3a; }
+    .list { margin-top: 2rem; }
+    .list-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e8e0d4;
+    }
+    .list-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--sand);
+    }
+    .list-item-body { flex: 1; }
+    .list-item code { font-size: 0.85rem; background: var(--sand); padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .back { margin-top: 2rem; }
+    .back a { color: var(--moss); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Atualizar galeria do site</h1>
+    <p><strong>Kokedama Nice &amp; Lua</strong> · Santo André</p>
+
+    <div class="steps">
+      <strong>Como publicar novas fotos:</strong>
+      <ol>
+        <li>Envie as imagens para a pasta <code>gallery/</code> no seu site (pelo painel do hospedeiro).</li>
+        <li>Use o formulário abaixo para montar a lista (nome do arquivo + legenda).</li>
+        <li>Clique em <strong>Baixar gallery.json</strong> e substitua o arquivo <code>gallery/gallery.json</code> no servidor.</li>
+        <li>Pronto — a página inicial atualiza automaticamente.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;font-size:1.1rem;">Adicionar foto</h2>
+      <label for="file-name">Nome do arquivo (como está na pasta gallery/)</label>
+      <input type="text" id="file-name" placeholder="ex. kokedama-presente-maio.jpg" />
+
+      <label for="caption">Legenda (aparece na foto)</label>
+      <input type="text" id="caption" placeholder="ex. Kokedama média para presente" />
+
+      <label for="file-preview">Pré-visualizar (opcional — só no seu computador)</label>
+      <input type="file" id="file-preview" accept="image/*" />
+
+      <button type="button" class="btn btn-primary" id="btn-add">Adicionar à galeria</button>
+      <button type="button" class="btn btn-secondary" id="btn-download">Baixar gallery.json</button>
+    </div>
+
+    <div class="list">
+      <h2>Fotos na galeria (<span id="count">0</span>)</h2>
+      <div id="photo-list"></div>
+    </div>
+
+    <p class="back"><a href="../index.html">← Voltar ao site</a></p>
+  </div>
+
+  <script>
+    let photos = [];
+
+    async function loadCurrent() {
+      try {
+        const res = await fetch("../gallery/gallery.json");
+        if (res.ok) {
+          const data = await res.json();
+          photos = data.photos || [];
+          renderList();
+        }
+      } catch (_) {}
+    }
+
+    function photoUrl(file) {
+      if (/^https?:\/\//i.test(file)) return file;
+      return "../gallery/" + file;
+    }
+
+    function renderList() {
+      document.getElementById("count").textContent = photos.length;
+      const list = document.getElementById("photo-list");
+      if (!photos.length) {
+        list.innerHTML = "<p>Nenhuma foto ainda. Adicione acima.</p>";
+        return;
+      }
+      list.innerHTML = photos
+        .map(
+          (p, i) => `
+        <div class="list-item">
+          <img src="${photoUrl(p.file)}" alt="" onerror="this.style.opacity=0.3" />
+          <div class="list-item-body">
+            <div><code>${p.file}</code></div>
+            <div>${p.caption || "<em>sem legenda</em>"}</div>
+            <button type="button" class="btn btn-danger btn-sm" data-i="${i}">Remover</button>
+          </div>
+        </div>`
+        )
+        .join("");
+
+      list.querySelectorAll("button[data-i]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          photos.splice(Number(btn.dataset.i), 1);
+          renderList();
+        });
+      });
+    }
+
+    document.getElementById("btn-add").addEventListener("click", () => {
+      const file = document.getElementById("file-name").value.trim();
+      const caption = document.getElementById("caption").value.trim();
+      if (!file) {
+        alert("Informe o nome do arquivo (ex. minha-foto.jpg)");
+        return;
+      }
+      photos.push({ file, caption });
+      document.getElementById("file-name").value = "";
+      document.getElementById("caption").value = "";
+      document.getElementById("file-preview").value = "";
+      renderList();
+    });
+
+    document.getElementById("file-preview").addEventListener("change", (e) => {
+      const f = e.target.files[0];
+      if (f && !document.getElementById("file-name").value.trim()) {
+        document.getElementById("file-name").value = f.name.replace(/\s+/g, "-").toLowerCase();
+      }
+    });
+
+    document.getElementById("btn-download").addEventListener("click", () => {
+      const json = JSON.stringify({ photos }, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "gallery.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    loadCurrent();
+  </script>
+</body>
+</html>
